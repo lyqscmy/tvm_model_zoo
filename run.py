@@ -1,9 +1,13 @@
 import tvm
 import numpy as np
 from tvm.contrib import graph_runtime
-from LR import input_shape, output_shape
+from fc import input_shape, output_shape
+from functools import reduce
+from operator import mul
 
-data = np.arange(6).reshape((input_shape)).astype("float32")
+data = np.arange(
+    reduce(mul, input_shape), dtype="float32").reshape(input_shape)
+print(data)
 data = tvm.ndarray.array(data)
 out = tvm.ndarray.empty(output_shape)
 
@@ -24,6 +28,12 @@ module.load_params(loaded_params)
 module.set_input("data", data)
 module.run()
 module.get_output(0, out)
+out = out.asnumpy()
 
-print(out.asnumpy())
-
+print(out)
+out_b = tvm.ndarray.empty(output_shape)
+for i in range(10):
+    module.set_input("data", data)
+    module.run()
+    if not np.allclose(out, module.get_output(0, out_b).asnumpy()):
+        raise AssertionError('predict not stable')

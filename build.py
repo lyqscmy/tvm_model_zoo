@@ -1,4 +1,4 @@
-from LR import net, input_shape, params
+from fc import net, input_shape, params
 import nnvm
 from pathlib import Path
 
