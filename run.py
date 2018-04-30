@@ -50,6 +50,6 @@ def bench(data, out):
 num_trials = 10
 
 mlp_time = timeit.timeit(
-        'bench(data, out)', number=num_trials, globals={'bench':bench, 'data': data, 'out': out})
+        'module.run()', number=num_trials, globals={'module':module,'bench':bench, 'data': data, 'out': out})
 print('='*20)
 print('mlp:{:.6f}'.format(mlp_time / num_trials))
