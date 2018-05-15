@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from mlp import net, input_shape, params
 import nnvm
 from pathlib import Path

@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import timeit
 import tvm
 import numpy as np
@@ -7,8 +9,7 @@ from pathlib import Path
 from functools import reduce
 from operator import mul
 
-data = np.arange(
-    reduce(mul, input_shape), dtype="float32").reshape(input_shape)
+data = np.zeros(reduce(mul, input_shape), dtype="float32").reshape(input_shape)
 print(data)
 data = tvm.ndarray.array(data)
 out = tvm.ndarray.empty(output_shape)
@@ -32,24 +33,25 @@ module.load_params(loaded_params)
 module.set_input("data", data)
 module.run()
 module.get_output(0, out)
-# out = out.asnumpy()
+out = out.asnumpy()
 
-# print(out)
-# out_b = tvm.ndarray.empty(output_shape)
-# for i in range(10):
-#     module.set_input("data", data)
-#     module.run()
-#     if not np.allclose(out, module.get_output(0, out_b).asnumpy()):
-#         raise AssertionError('predict not stable')
-
-def bench(data, out):
+print(out)
+out_b = tvm.ndarray.empty(output_shape)
+for i in range(10):
     module.set_input("data", data)
     module.run()
-    module.get_output(0, out)
+    if not np.allclose(out, module.get_output(0, out_b).asnumpy()):
+        raise AssertionError('predict not stable')
 
-num_trials = 10
+num_trials = 100
 
 mlp_time = timeit.timeit(
-        'module.run()', number=num_trials, globals={'module':module,'bench':bench, 'data': data, 'out': out})
-print('='*20)
+    'module.run()',
+    number=num_trials,
+    globals={
+        'module': module,
+        'data': data,
+        'out': out
+    })
+print('=' * 20)
 print('mlp:{:.6f}'.format(mlp_time / num_trials))
